@@ -21,4 +21,6 @@ private:
     int num_disks_;
 };
 
+bool IsValidCommand(std::string cmd);
+
 #endif

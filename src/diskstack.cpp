@@ -1,5 +1,6 @@
 #include "diskstack.hpp"
 #include "game.hpp"
+#include "util.hpp"
 
 #include <stdexcept>
 
@@ -25,13 +26,14 @@ bool DiskStack::CanAccept(int other) {
 }
 
 void DiskStack::Accept(int other) {
-    if (!CanAccept(other)) throw std::runtime_error("Bad move");
+    if (!CanAccept(other)) throw BadMoveException();
     disks_.push_back(other);
 }
 
 void DiskStack::Move(DiskStack* other) {
+    if (this->Height() == 0 || this == other) throw BadMoveException();
     int top = Top();
-    if (!other->CanAccept(top)) throw std::runtime_error("Bad move");
+    if (!other->CanAccept(top)) throw BadMoveException();
     other->Accept(top);
     TakeFromTop();
 }

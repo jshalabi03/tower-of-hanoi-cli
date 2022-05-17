@@ -29,6 +29,9 @@ DiskStack* Game::GetStackFromChar(char c) {
 }
 
 void Game::AcceptCommand(std::string cmd) {
+
+    if (!IsValidCommand(cmd)) throw InvalidInputException();
+
     char from_char = cmd.at(0);
     char to_char = cmd.at(2);
 
@@ -39,15 +42,9 @@ void Game::AcceptCommand(std::string cmd) {
 }
 
 std::ostream& operator<<(std::ostream& os, const Game& g) {
-    DiskStack* left = g.left_;
-    DiskStack* middle = g.middle_;
-    DiskStack* right = g.right_;
-    DiskStack* current = left;
-
     std::vector<int> left_copy(g.left_->disks_);
     std::vector<int> middle_copy(g.middle_->disks_);
     std::vector<int> right_copy(g.right_->disks_);
-
     std::list<std::vector<int>*> stacks
      {&left_copy, &middle_copy, &right_copy};
 
@@ -55,25 +52,19 @@ std::ostream& operator<<(std::ostream& os, const Game& g) {
                         std::max(middle_copy.size(),
                                  right_copy.size()));
 
-    for (int curr_height = max_height;
-         curr_height > 0;
-          --curr_height) {
+    for (int curr_height = max_height; 
+         curr_height > 0; 
+         --curr_height) {
 
         for (std::vector<int>* stack : stacks) {
-
-            if (stack->size() < curr_height) {
-                PrintMultipleTimes(os, ' ', g.num_disks_);
-            } else {
+            if (stack->size() < curr_height) PrintMultipleTimes(os, ' ', g.num_disks_);
+            else {
                 PrintMultipleTimes(os, 'a', stack->at(curr_height - 1) + 1);
-                PrintMultipleTimes(os, ' ', g.num_disks_ - stack->at(curr_height - 1) - 1);
+                PrintMultipleTimes(os, ' ', g.num_disks_ - (stack->at(curr_height - 1) + 1) );
             }
-
             if (stack != &right_copy) os << ' ';
-
         }
-
         os << '\n';
-
     }
 
     PrintMultipleTimes(os, '-', g.num_disks_);
@@ -86,56 +77,6 @@ std::ostream& operator<<(std::ostream& os, const Game& g) {
 
 }
 
-/*
-
-a
-aa
-aaa
---- --- ---
-
-///////////
-
-aa
-aaa     a
---- --- ---
-
-///////////
-
-aaa aa  a
---- --- ---
-
-///////////
-
-    a
-aaa aa  
---- --- ---
-
-///////////
-
-    a
-    aa  aaa
---- --- ---
-
-///////////
-
-a   aa  aaa
---- --- ---
-
-///////////
-
-        aa
-a       aaa
---- --- ---
-
-///////////
-
-        a
-        aa
-        aaa
---- --- ---
-
-*/
-
 bool Game::HasWon() {
     return right_->Height() == num_disks_;
 }
@@ -146,12 +87,33 @@ void Game::Play() {
     while (true) {
         std::cout << "COMMAND: ";
         std::getline(std::cin, cmd);
-        AcceptCommand(cmd);
-        std::cout << "_________________________________\n";
-        std::cout << std::endl << *this << std::endl;
-        if (HasWon()) {
-            std::cout << "Congratulations, you win!" << std::endl;
-            break;
+        try {
+            AcceptCommand(cmd);
+            std::cout << "_________________________________\n";
+            std::cout << std::endl << *this << std::endl;
+            if (HasWon()) {
+                std::cout << "Congratulations, you win!" << std::endl;
+                break;
+            }
+        } catch (InvalidInputException& e) {
+            std::cout << "Invalid command." << std::endl;
+        } catch (BadMoveException& e) {
+            std::cout << "Invalid move." << std::endl;
         }
     }
+}
+
+bool IsValidCommand(std::string cmd) {
+    std::vector<std::string> valid_options
+        {"lr", "lm", "ml", "mr", "rl", "rm"};
+
+    if (cmd.length() != 3) return false;
+
+    std::string res;
+    res.push_back(cmd.at(0));
+    res.push_back(cmd.at(2));
+
+    return cmd.at(1) == ' ' && 
+        std::find(valid_options.begin(), valid_options.end(), res) 
+        != valid_options.end();
 }
