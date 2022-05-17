@@ -2,8 +2,6 @@
 
 #include "game.hpp"
 
-#include "util.hpp"
-
 using namespace std;
 
 int main() {
