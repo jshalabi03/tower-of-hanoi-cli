@@ -9,6 +9,7 @@ class Game {
 public:
     Game();
     Game(int size);
+    ~Game();
     void AcceptCommand(std::string cmd);
     void Play();
     bool HasWon();
@@ -19,6 +20,11 @@ private:
     DiskStack* middle_;
     DiskStack* right_;
     int num_disks_;
+
+    void Clear();
+    void SetDisks(int size);
+
+    void PromptGameSizeRequest();
 };
 
 bool IsValidCommand(std::string cmd);

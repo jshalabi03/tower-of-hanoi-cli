@@ -82,6 +82,9 @@ bool Game::HasWon() {
 }
 
 void Game::Play() {
+
+    PromptGameSizeRequest();
+
     std::cout << *this << std::endl;
     std::string cmd;
     while (true) {
@@ -116,4 +119,37 @@ bool IsValidCommand(std::string cmd) {
     return cmd.at(1) == ' ' && 
         std::find(valid_options.begin(), valid_options.end(), res) 
         != valid_options.end();
+}
+
+Game::~Game() {
+    Clear();
+}
+
+void Game::Clear() {
+    delete left_;
+    delete middle_;
+    delete right_;
+}
+
+void Game::SetDisks(int size) {
+    Clear();
+    num_disks_ = size;
+    left_ = new DiskStack(size);
+    middle_ = new DiskStack();
+    right_ = new DiskStack();
+}
+
+void Game::PromptGameSizeRequest() {
+    int n;
+    while (true) {
+        std::cout << "Enter amount of disks to play with: ";
+        std::cin >> n;
+        if (n > 0) break;
+        else std::cout << "Please enter a valid puzzle size (positive integer).\n";
+    }
+
+    // flush stream of lingering enter keystroke
+    std::cin.get();
+
+    SetDisks(n);
 }
